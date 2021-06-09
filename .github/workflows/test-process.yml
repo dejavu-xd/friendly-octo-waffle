@@ -1,0 +1,63 @@
+name: Test Process
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'State ID'
+        required: true
+
+jobs:
+  mine:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+
+    - name: mine
+      run: |
+        echo "$GITHUB_RUN_NUMBER"
+        echo "VERSION=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+        cd miner
+        npm i
+        node index.js "${{ github.event.inputs.id }}"
+
+    - name: upload elites
+      uses: actions/upload-artifact@v2
+      with:
+        name: elites
+        path: miner/result
+
+    - name: loop
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+      run: |
+        curl \
+          -X POST \
+          -u "dejavu-xd:${GH_PAT}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/dejavu-xd/friendly-octo-waffle/actions/workflows/test-process.yml/dispatches \
+          -d "{\"ref\":\"master\",\"inputs\":{\"id\":\"${{ github.event.inputs.id }}\"}}"
+    
+    - name: unbox
+      run: |
+        cp miner/result unboxer-actions/input
+        cd unboxer-actions
+        npm i
+        node index.js 2>> error
+
+    - name: upload data.db
+      uses: actions/upload-artifact@v2
+      with:
+        name: p-${{ env.VERSION }}.db
+        path: unboxer-actions/data.db
+
+    - name: upload error
+      uses: actions/upload-artifact@v2
+      with:
+        name: error
+        path: unboxer-actions/error

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "better-sqlite3": "^7.1.5",
+    "chalk": "^4.1.0",
+    "juration": "^0.1.1",
+    "puppeteer": "^9.0.0",
+    "puppeteer-cluster": "^0.22.0"
+  }
+}

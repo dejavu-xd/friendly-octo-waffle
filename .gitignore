@@ -1,0 +1,7 @@
+.clang-format
+node_modules/
+
+miner/miner
+
+unboxer-actions/data.db
+tmp-*
