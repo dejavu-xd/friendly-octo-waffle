@@ -11,25 +11,8 @@
 
 typedef unsigned long long u64_t;
 typedef unsigned char u8_t;
-const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-=";
+#include "config.h"
 
-const u8_t val_base[N] = {
-	0,	 190, 226, 55,	197, 245, 250, 26,	253, 17,  213, 108, 43,	 198, 12,  91,
-	166, 225, 251, 47,	13,	 7,	  46,  45,	152, 53,  182, 37,	180, 68,  98,  241,
-	128, 170, 22,  222, 123, 140, 204, 88,	142, 179, 100, 80,	237, 124, 171, 1,
-	77,	 31,  122, 157, 24,	 191, 103, 76,	167, 218, 242, 160, 48,	 82,  255, 181,
-	74,	 8,	  23,  99,	44,	 39,  229, 156, 83,	 172, 194, 211, 92,	 38,  62,  106,
-	57,	 96,  9,   25,	109, 127, 65,  201, 148, 151, 135, 107, 97,	 240, 116, 34,
-	27,	 233, 110, 220, 162, 177, 145, 246, 15,	 121, 79,  138, 238, 239, 56,  216,
-	93,	 20,  174, 70,	63,	 195, 133, 71,	183, 223, 40,  205, 64,	 10,  163, 2,
-	188, 187, 36,  112, 52,	 149, 208, 219, 207, 104, 155, 153, 51,	 227, 32,  249,
-	196, 193, 175, 221, 252, 115, 185, 42,	199, 87,  200, 130, 248, 230, 49,  30,
-	19,	 203, 146, 129, 59,	 94,  60,  58,	154, 228, 73,  159, 105, 119, 111, 136,
-	234, 120, 6,   66,	215, 254, 75,  50,	54,	 189, 169, 139, 84,	 61,  224, 161,
-	168, 29,  184, 247, 137, 212, 86,  33,	81,	 18,  232, 173, 165, 67,  132, 192,
-	147, 90,  14,  28,	231, 89,  3,   85,	176, 236, 217, 164, 144, 95,  131, 126,
-	4,	 118, 102, 158, 78,	 235, 117, 202, 113, 134, 35,  178, 69,	 243, 150, 206,
-	101, 5,	  72,  214, 186, 16,  209, 143, 125, 11,  114, 21,	41,	 210, 244, 141};
 u8_t freq[16], skill[skill_cnt], name_base[M], val[N];
 u8_t p, q, s, name[LEN + 10];
 int st[52], V;
@@ -44,12 +27,12 @@ inline u8_t gen() {
 }
 
 #define median(x, y, z) std::max(std::min(x, y), std::min(std::max(x, y), z))
-#define LIM 80
+#define LIM 72
 #define WK(x) val[i + x] = val[i + x] * 181 + 160;
 #define a name_base
-#define bw_threshold 632
+#define bw_threshold 612
 
-template <int len>
+template <int len, bool prune>
 int load_name(int *arr) {
 	q_len = -1;
 	memcpy(val, val_base, sizeof val);
@@ -74,26 +57,22 @@ int load_name(int *arr) {
 			if (val[i] >= 89 && val[i] < 217) name_base[++q_len] = val[i] & 63;
 	}
 
-	V = 252;
-	V += median(a[10], a[11], a[12]);
-	V += median(a[13], a[14], a[15]);
-	V += median(a[16], a[17], a[18]);
-	V += median(a[19], a[20], a[21]);
-	V += median(a[22], a[23], a[24]);
-	V += median(a[25], a[26], a[27]);
-	V += median(a[28], a[29], a[30]);
-	if (V < bw_threshold - 132) return 0;
+	V = 0;
+	V += arr[7] = median(a[28], a[29], a[30]) + 36;
+	if (prune && arr[7] <= 67) return 0;
+	V += arr[6] = median(a[25], a[26], a[27]) + 36;
+	if (prune && arr[6] <= 45) return 0;
+	V += arr[2] = median(a[13], a[14], a[15]) + 36;
+	if (prune && arr[2] <= 45) return 0;
+	V += arr[3] = median(a[16], a[17], a[18]) + 36;
+	if (prune && arr[3] <= 39) return 0;
+	V += arr[1] = median(a[10], a[11], a[12]) + 36;
+	V += arr[4] = median(a[19], a[20], a[21]) + 36;
+	V += arr[5] = median(a[22], a[23], a[24]) + 36;
+	if (prune && V < bw_threshold - 132) return 0;
 	std::sort(a, a + 10);
 	arr[0] = 154 + a[3] + a[4] + a[5] + a[6];
 	V += (unsigned)arr[0] / 3;
-	if (V < bw_threshold) return 0;
-	arr[1] = median(a[10], a[11], a[12]) + 36;
-	arr[2] = median(a[13], a[14], a[15]) + 36;
-	arr[3] = median(a[16], a[17], a[18]) + 36;
-	arr[4] = median(a[19], a[20], a[21]) + 36;
-	arr[5] = median(a[22], a[23], a[24]) + 36;
-	arr[6] = median(a[25], a[26], a[27]) + 36;
-	arr[7] = median(a[28], a[29], a[30]) + 36;
 #undef a
 	return 1;
 }
@@ -160,7 +139,7 @@ int main(int argc, char **argv) {
 		name[LEN - 3] = charset[(i >> 12) & 63];
 		name[LEN - 2] = charset[(i >> 6) & 63];
 		name[LEN - 1] = charset[(i >> 0) & 63];
-		if (load_name<LEN>(st)) {
+		if (load_name<LEN, 1>(st)) {
 			bool yes = false;
 			int cnt = 0;
 
@@ -171,12 +150,12 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < 16; i++)
 				if (freq[i]) {
 					// if (V >= 652 && freq[i] >= 90) goto yes;
-					if (V >= 672 && freq[i] >= 95) goto yes;
+					if (V >= 672 && freq[i] >= 100) goto yes;
 					st[skill[i] + 8] = freq[i];
 				}
 
 			if (st[24 + 8] >= 50) {	 // 幻术
-				load_name<LEN + 7>(st + 43);
+				load_name<LEN + 7, 0>(st + 43);
 				st[51] = 31 + (std::min(std::min(name_base[64], name_base[65]),
 										std::min(name_base[66], name_base[67])) >>
 							   1);
@@ -189,7 +168,7 @@ int main(int argc, char **argv) {
 					for (int j = i; j < 9; j++)
 						model_input[cnt++] = st[i + 43] * st[j + 43];
 
-				yes |= QP::predict_shadow(model_input) >= 5200;
+				if (QP::predict_shadow(model_input) >= 5600) goto yes;
 			} else {
 				for (int i = 0; i < 9; i++) st[i + 43] = 0;
 
@@ -197,13 +176,13 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < 43; i++)
 					for (int j = i; j < 43; j++) model_input[cnt++] = st[i] * st[j];
 
-				yes |= QP::predict(model_input) >= (V < 642 ? 5100 : 5050);
+				if (QP::predict(model_input) >= 5500) goto yes;
 			}
 
-			if (yes) {
+			if (0) {
 			yes:;
 				for (int i = 1; i < LEN; i++) putchar(name[i]);
-				puts("@powerless");
+				puts("@" TEAM);
 				fflush(stdout);
 			}
 		}
@@ -214,10 +193,11 @@ int main(int argc, char **argv) {
 			clock_t end = clock();
 			double tm = 1. * (end - start) / CLOCKS_PER_SEC;
 			int time_left = (r - i) * tm / k;
-			fprintf(stderr,
-					"count: %llu, time: %fs, speed: %f/d, time left: %02d:%02d:%02d.\n",
-					k, tm, k / tm * 86400, time_left / 3600, time_left / 60 % 60,
-					time_left % 60);
+			fprintf(
+				stderr,
+				"count: %llu, time: %fs, speed: %.3fE/d, time left: %02d:%02d:%02d.\n", k,
+				tm, k / tm * 86400 / 1e8, time_left / 3600, time_left / 60 % 60,
+				time_left % 60);
 #else
 			fputs("\n", stderr);
 #endif
