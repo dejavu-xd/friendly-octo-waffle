@@ -30,7 +30,7 @@ inline u8_t gen() {
 #define LIM 72
 #define WK(x) val[i + x] = val[i + x] * 181 + 160;
 #define a name_base
-#define bw_threshold 612
+#define bw_threshold 632
 
 template <int len, bool prune>
 int load_name(int *arr) {
