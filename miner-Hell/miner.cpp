@@ -12,7 +12,6 @@
 typedef unsigned long long u64_t;
 typedef unsigned char u8_t;
 #include "config.h"
-
 u8_t freq[16], skill[skill_cnt], name_base[M], val[N];
 u8_t p, q, s, name[LEN + 10];
 int st[52], V;
@@ -27,12 +26,12 @@ inline u8_t gen() {
 }
 
 #define median(x, y, z) std::max(std::min(x, y), std::min(std::max(x, y), z))
-#define LIM 72
+#define LIM 80
 #define WK(x) val[i + x] = val[i + x] * 181 + 160;
 #define a name_base
-#define bw_threshold 632
+#define bw_threshold 612
 
-template <int len, bool prune>
+template <int len>
 int load_name(int *arr) {
 	q_len = -1;
 	memcpy(val, val_base, sizeof val);
@@ -57,22 +56,26 @@ int load_name(int *arr) {
 			if (val[i] >= 89 && val[i] < 217) name_base[++q_len] = val[i] & 63;
 	}
 
-	V = 0;
-	V += arr[7] = median(a[28], a[29], a[30]) + 36;
-	if (prune && arr[7] <= 67) return 0;
-	V += arr[6] = median(a[25], a[26], a[27]) + 36;
-	if (prune && arr[6] <= 45) return 0;
-	V += arr[2] = median(a[13], a[14], a[15]) + 36;
-	if (prune && arr[2] <= 45) return 0;
-	V += arr[3] = median(a[16], a[17], a[18]) + 36;
-	if (prune && arr[3] <= 39) return 0;
-	V += arr[1] = median(a[10], a[11], a[12]) + 36;
-	V += arr[4] = median(a[19], a[20], a[21]) + 36;
-	V += arr[5] = median(a[22], a[23], a[24]) + 36;
-	if (prune && V < bw_threshold - 132) return 0;
+	V = 252;
+	V += median(a[10], a[11], a[12]);
+	V += median(a[13], a[14], a[15]);
+	V += median(a[16], a[17], a[18]);
+	V += median(a[19], a[20], a[21]);
+	V += median(a[22], a[23], a[24]);
+	V += median(a[25], a[26], a[27]);
+	V += median(a[28], a[29], a[30]);
+	if (V < bw_threshold - 132) return 0;
 	std::sort(a, a + 10);
 	arr[0] = 154 + a[3] + a[4] + a[5] + a[6];
 	V += (unsigned)arr[0] / 3;
+	if (V < bw_threshold) return 0;
+	arr[1] = median(a[10], a[11], a[12]) + 36;
+	arr[2] = median(a[13], a[14], a[15]) + 36;
+	arr[3] = median(a[16], a[17], a[18]) + 36;
+	arr[4] = median(a[19], a[20], a[21]) + 36;
+	arr[5] = median(a[22], a[23], a[24]) + 36;
+	arr[6] = median(a[25], a[26], a[27]) + 36;
+	arr[7] = median(a[28], a[29], a[30]) + 36;
 #undef a
 	return 1;
 }
@@ -139,7 +142,7 @@ int main(int argc, char **argv) {
 		name[LEN - 3] = charset[(i >> 12) & 63];
 		name[LEN - 2] = charset[(i >> 6) & 63];
 		name[LEN - 1] = charset[(i >> 0) & 63];
-		if (load_name<LEN, 1>(st)) {
+		if (load_name<LEN>(st)) {
 			bool yes = false;
 			int cnt = 0;
 
@@ -150,12 +153,12 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < 16; i++)
 				if (freq[i]) {
 					// if (V >= 652 && freq[i] >= 90) goto yes;
-					if (V >= 672 && freq[i] >= 100) goto yes;
+					if (V >= 672 && freq[i] >= 95) goto yes;
 					st[skill[i] + 8] = freq[i];
 				}
 
 			if (st[24 + 8] >= 50) {	 // 幻术
-				load_name<LEN + 7, 0>(st + 43);
+				load_name<LEN + 7>(st + 43);
 				st[51] = 31 + (std::min(std::min(name_base[64], name_base[65]),
 										std::min(name_base[66], name_base[67])) >>
 							   1);
@@ -168,7 +171,7 @@ int main(int argc, char **argv) {
 					for (int j = i; j < 9; j++)
 						model_input[cnt++] = st[i + 43] * st[j + 43];
 
-				if (QP::predict_shadow(model_input) >= 5600) goto yes;
+				yes |= QP::predict_shadow(model_input) >= 5600;
 			} else {
 				for (int i = 0; i < 9; i++) st[i + 43] = 0;
 
@@ -176,13 +179,13 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < 43; i++)
 					for (int j = i; j < 43; j++) model_input[cnt++] = st[i] * st[j];
 
-				if (QP::predict(model_input) >= 5500) goto yes;
+				yes |= QP::predict(model_input) >= 5500;
 			}
 
-			if (0) {
+			if (yes) {
 			yes:;
 				for (int i = 1; i < LEN; i++) putchar(name[i]);
-				puts("@" TEAM);
+				puts("@powerless");
 				fflush(stdout);
 			}
 		}
@@ -193,11 +196,10 @@ int main(int argc, char **argv) {
 			clock_t end = clock();
 			double tm = 1. * (end - start) / CLOCKS_PER_SEC;
 			int time_left = (r - i) * tm / k;
-			fprintf(
-				stderr,
-				"count: %llu, time: %fs, speed: %.3fE/d, time left: %02d:%02d:%02d.\n", k,
-				tm, k / tm * 86400 / 1e8, time_left / 3600, time_left / 60 % 60,
-				time_left % 60);
+			fprintf(stderr,
+					"count: %llu, time: %fs, speed: %f/d, time left: %02d:%02d:%02d.\n",
+					k, tm, k / tm * 86400, time_left / 3600, time_left / 60 % 60,
+					time_left % 60);
 #else
 			fputs("\n", stderr);
 #endif
