@@ -31,17 +31,6 @@ jobs:
       with:
         name: elites
         path: miner/result
-
-    - name: loop
-      env:
-        GH_PAT: ${{ secrets.GH_PAT }}
-      run: |
-        curl \
-          -X POST \
-          -u "dejavu-xd:${GH_PAT}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/dejavu-xd/friendly-octo-waffle/actions/workflows/test-process.yml/dispatches \
-          -d "{\"ref\":\"master\",\"inputs\":{\"id\":\"${{ github.event.inputs.id }}\"}}"
     
     - name: unbox
       run: |
@@ -61,3 +50,14 @@ jobs:
       with:
         name: error
         path: unboxer-actions/error
+
+    - name: loop
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+      run: |
+        curl \
+          -X POST \
+          -u "dejavu-xd:${GH_PAT}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/dejavu-xd/friendly-octo-waffle/actions/workflows/test-process.yml/dispatches \
+          -d "{\"ref\":\"master\",\"inputs\":{\"id\":\"${{ github.event.inputs.id }}\"}}"
