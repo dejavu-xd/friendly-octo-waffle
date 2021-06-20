@@ -31,7 +31,7 @@ inline u8_t gen() {
 #define a name_base
 #define bw_threshold 612
 
-template <int len>
+template <int len, bool skip>
 int load_name(int *arr) {
 	q_len = -1;
 	memcpy(val, val_base, sizeof val);
@@ -64,11 +64,11 @@ int load_name(int *arr) {
 	V += median(a[22], a[23], a[24]);
 	V += median(a[25], a[26], a[27]);
 	V += median(a[28], a[29], a[30]);
-	if (V < bw_threshold - 132) return 0;
+	if (skip && V < bw_threshold - 132) return 0;
 	std::sort(a, a + 10);
 	arr[0] = 154 + a[3] + a[4] + a[5] + a[6];
 	V += (unsigned)arr[0] / 3;
-	if (V < bw_threshold) return 0;
+	if (skip && V < bw_threshold) return 0;
 	arr[1] = median(a[10], a[11], a[12]) + 36;
 	arr[2] = median(a[13], a[14], a[15]) + 36;
 	arr[3] = median(a[16], a[17], a[18]) + 36;
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 		name[LEN - 3] = charset[(i >> 12) & 63];
 		name[LEN - 2] = charset[(i >> 6) & 63];
 		name[LEN - 1] = charset[(i >> 0) & 63];
-		if (load_name<LEN>(st)) {
+		if (load_name<LEN, true>(st)) {
 			bool yes = false;
 			int cnt = 0;
 
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
 				}
 
 			if (st[24 + 8] >= 50) {	 // 幻术
-				load_name<LEN + 7>(st + 43);
+				load_name<LEN + 7, false>(st + 43);
 				st[51] = 31 + (std::min(std::min(name_base[64], name_base[65]),
 										std::min(name_base[66], name_base[67])) >>
 							   1);
