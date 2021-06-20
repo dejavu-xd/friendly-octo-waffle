@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
 			if (yes) {
 			yes:;
 				for (int i = 1; i < LEN; i++) putchar(name[i]);
-				puts("@powerless");
+				puts("@" TEAM);
 				fflush(stdout);
 			}
 		}
