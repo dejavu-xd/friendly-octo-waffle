@@ -151,11 +151,8 @@ int main(int argc, char **argv) {
 
 			memset(st + 8, 0, 35 * sizeof(int));
 			for (int i = 0; i < 16; i++)
-				if (freq[i]) {
-					// if (V >= 652 && freq[i] >= 90) goto yes;
-					if (V >= 672 && freq[i] >= 95) goto yes;
-					st[skill[i] + 8] = freq[i];
-				}
+				if (freq[i]) st[skill[i] + 8] = freq[i];
+			if (st[34 + 8] >= 95) goto yes;
 
 			if (st[24 + 8] >= 50) {	 // 幻术
 				load_name<LEN + 7, false>(st + 43);
