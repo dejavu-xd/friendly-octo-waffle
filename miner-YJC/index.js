@@ -6,12 +6,12 @@ const fs = require('fs');
 (async () => {
 	const token = 'OnJ6EtO7zZHIxCslMoP4BeEnaTK9j6G3T5oTQpxu5Vo=';
 	const { start, step, threads, prefix } =
-		await fetch('https://kv.akioi.ml/api/get?' + new URLSearchParams({ token, key: 'djv-' + process.argv[2] }))
+		await fetch('https://kv.akioi.ml/api/get?' + new URLSearchParams({ token, key: 'pf-emc-' + process.argv[2] }))
 			.then(resp => resp.json())
 			.then(({ value }) => JSON.parse(value))
 	const miners = [];
 
-	cp.execSync(`g++-10 miner.cpp -o miner -Ofast -funroll-loops -mavx -mavx2 -DLEN=${prefix.length + 8}`);
+	cp.execSync(`g++-10 miner.cpp -o miner -Ofast -funroll-loops -mavx -mavx2 -DLEN=${new TextEncoder().encode(prefix).length + 8}`);
 
 	var startTp = performance.now(), count = 0;
 	for (var i = 0; i < threads; i++)
@@ -38,7 +38,7 @@ const fs = require('fs');
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({
-			key: 'djv-' + process.argv[2],
+			key: 'pf-emc-' + process.argv[2],
 			value: JSON.stringify({
 				start: start + threads * step,
 				step,
