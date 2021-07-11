@@ -6,7 +6,7 @@ const fs = require('fs');
 (async () => {
 	const token = 'OnJ6EtO7zZHIxCslMoP4BeEnaTK9j6G3T5oTQpxu5Vo=';
 	const { start, step, threads, prefix } =
-		await fetch('https://kv.akioi.ml/api/get?' + new URLSearchParams({ token, key: 'pf-emc-' + process.argv[2] }))
+		await fetch('https://kv.akioi.ml/api/get?' + new URLSearchParams({ token, key: 'djv-' + process.argv[2] }))
 			.then(resp => resp.json())
 			.then(({ value }) => JSON.parse(value))
 	const miners = [];
