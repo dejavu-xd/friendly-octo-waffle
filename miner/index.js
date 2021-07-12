@@ -38,7 +38,7 @@ const fs = require('fs');
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({
-			key: 'pf-emc-' + process.argv[2],
+			key: 'djv-' + process.argv[2],
 			value: JSON.stringify({
 				start: start + threads * step,
 				step,
