@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 
 const fetchRetry = (...options) => new Promise(async (resolve, reject) => {
-	var retries = 0;
+	var retries = 0, time = 1000;
 	var maxRetries = 10;
 	while (retries < maxRetries) {
 		try {
@@ -12,6 +12,9 @@ const fetchRetry = (...options) => new Promise(async (resolve, reject) => {
 			return resolve(response);
 		} catch (err) {
 			console.log(`Error Status: ${err}`);
+			console.log(`sleep ${time / 1000}s...`);
+			await new Promise(resolve => setTimeout(resolve, time));
+			time += 1000;
 		}
 		retries++;
 	}
