@@ -5,7 +5,7 @@ const fs = require('fs');
 
 const fetchRetry = (...options) => new Promise(async (resolve, reject) => {
 	var retries = 0, time = 1000;
-	var maxRetries = 10;
+	var maxRetries = 20;
 	while (retries < maxRetries) {
 		try {
 			const response = await fetch(...options);
